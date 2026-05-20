@@ -6,10 +6,10 @@ import { NavBar } from "@/components/NavBar";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
-  title: "Langue",
+  title: "Capte",
   description: "Personal language learning",
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Langue" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Capte" },
 };
 
 export const viewport: Viewport = {
