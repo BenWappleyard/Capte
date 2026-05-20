@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Card {
+  id         String   @id @default(cuid())
+  language   String   @default("fr")
+  front      String
+  back       String
+  type       String   @default("vocabulary") // vocabulary | phrase | verb
+  category   String?
+  exampleFr  String?
+  exampleEn  String?
+  notes      String?
+  metadata   String?  // JSON string for verbs (conjugations etc)
+  createdAt  DateTime @default(now())
+
+  schedule   CardSchedule?
+  reviews    Review[]
+}
+
+model CardSchedule {
+  id          String   @id @default(cuid())
+  cardId      String   @unique
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  nextReview  DateTime @default(now())
+  interval    Int      @default(1)
+  easeFactor  Float    @default(2.5)
+  repetitions Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  cardId     String
+  card       Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  rating     Int
+  reviewedAt DateTime @default(now())
+}
