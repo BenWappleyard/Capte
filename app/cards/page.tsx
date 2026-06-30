@@ -11,11 +11,7 @@ export default async function CardsPage() {
 
   return (
     <div className="px-5 pt-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Cards</h1>
-        <span className="text-sm text-[var(--color-muted)]">{cards.length} total</span>
-      </div>
-      <CardsClient cards={cards} />
+      <CardsClient cards={cards} total={cards.length} />
     </div>
   );
 }

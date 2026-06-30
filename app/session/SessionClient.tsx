@@ -176,10 +176,9 @@ function SessionSummary({
 
       <div className="w-full flex gap-2 mb-6">
         {[
-          { label: "Again", count: counts[1] ?? 0, color: "var(--color-again)" },
-          { label: "Hard", count: counts[2] ?? 0, color: "var(--color-hard)" },
-          { label: "Good", count: counts[3] ?? 0, color: "var(--color-good)" },
-          { label: "Easy", count: counts[4] ?? 0, color: "var(--color-easy)" },
+          { label: "I don't know", count: counts[1] ?? 0, color: "var(--color-again)" },
+          { label: "I hesitated", count: counts[2] ?? 0, color: "var(--color-hard)" },
+          { label: "I know it", count: counts[4] ?? 0, color: "var(--color-good)" },
         ].map((r) => (
           <div key={r.label} className="flex-1 text-center">
             <div

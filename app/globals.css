@@ -1,18 +1,33 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-bg: #FAFAF9;
+  --color-bg: #F9F9F9;
   --color-surface: #FFFFFF;
   --color-text: #1C1917;
   --color-muted: #78716C;
   --color-border: #E7E5E4;
-  --color-accent: #0D9488;
-  --color-accent-light: #CCFBF1;
+  --color-accent: #2563EB;
+  --color-accent-light: #DBEAFE;
   --color-again: #EF4444;
   --color-hard: #F97316;
   --color-good: #22C55E;
   --color-easy: #3B82F6;
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes border-rotate {
+  to { --border-angle: 360deg; }
+}
+
+.session-border {
+  background: conic-gradient(from var(--border-angle), #002395, #FFFFFF, #ED2939, #002395);
+  animation: border-rotate 8s linear infinite;
 }
 
 * {

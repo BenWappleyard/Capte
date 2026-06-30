@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import { NavBar } from "@/components/NavBar";
+import { LayoutShell } from "@/components/LayoutShell";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
@@ -23,8 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={geist.variable}>
       <body className="min-h-screen flex flex-col max-w-md mx-auto">
-        <main className="flex-1 pb-20">{children}</main>
-        <NavBar />
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );

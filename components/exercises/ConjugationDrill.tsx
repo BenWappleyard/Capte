@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Exercise } from "@/lib/exercises";
+import { caveat } from "@/lib/fonts";
 
 export function ConjugationDrill({
   exercise,
@@ -26,9 +27,9 @@ export function ConjugationDrill({
 
   return (
     <div className="flex-1 flex flex-col gap-5">
-      <div className="bg-white border border-[var(--color-border)] rounded-3xl p-8 text-center">
+      <div className="bg-white shadow-[2px_3px_0px_rgba(0,0,0,0.12)] p-8 text-center">
         <p className="text-xs text-[var(--color-muted)] uppercase tracking-widest mb-3">Conjugation</p>
-        <p className="text-2xl font-medium mb-4">{exercise.prompt}</p>
+        <p className={`text-2xl font-semibold mb-4 ${caveat.className}`}>{exercise.prompt}</p>
         <div className="flex gap-2 justify-center">
           <span className="px-3 py-1 bg-[var(--color-accent-light)] text-[var(--color-accent)] text-sm rounded-full font-medium">
             {tense}

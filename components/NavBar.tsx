@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { BookOpen, BarChart2, Library, PlusCircle } from "lucide-react";
 
 const links = [
-  { href: "/", label: "Today", icon: BookOpen },
+  { href: "/", label: "Learn", icon: BookOpen },
   { href: "/dashboard", label: "Progress", icon: BarChart2 },
   { href: "/cards", label: "Cards", icon: Library },
   { href: "/add", label: "Add", icon: PlusCircle },
@@ -15,7 +15,7 @@ export function NavBar() {
   const path = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-[var(--color-border)] pb-safe">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border border-[var(--color-border)] pb-safe" style={{ borderRadius: "20px 20px 0 0", boxShadow: "0 -8px 30px rgba(0,0,0,0.08), 0 -2px 8px rgba(0,0,0,0.05)" }}>
       <div className="flex">
         {links.map(({ href, label, icon: Icon }) => {
           const active = path === href;
@@ -23,7 +23,7 @@ export function NavBar() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+              className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-all active:scale-110 ${
                 active
                   ? "text-[var(--color-accent)]"
                   : "text-[var(--color-muted)]"

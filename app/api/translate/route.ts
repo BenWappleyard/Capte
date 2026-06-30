@@ -27,6 +27,17 @@ export async function GET(req: NextRequest) {
     });
 
     const translation = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    if (translation) return NextResponse.json({ results: [translation] });
+  } catch {
+    // fall through to MyMemory
+  }
+
+  try {
+    const mmRes = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text!)}&langpair=${from}|${to}`
+    );
+    const mmData = await mmRes.json() as { responseData?: { translatedText?: string }; responseStatus: number };
+    const translation = mmData.responseData?.translatedText?.trim() ?? "";
     return NextResponse.json({ results: translation ? [translation] : [] });
   } catch (err) {
     console.error("Translation error:", err);

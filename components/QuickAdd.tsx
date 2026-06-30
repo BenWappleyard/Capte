@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from "react";
-import { addCard } from "@/app/actions";
-import { Loader2 } from "lucide-react";
+import { addCard, importCards } from "@/app/actions";
+import { Loader2, MoreHorizontal } from "lucide-react";
+import { caveat } from "@/lib/fonts";
 
 interface DeckCard { front: string; back: string }
 interface Suggestion { word: string; lang: "fr" | "en" }
@@ -10,7 +11,7 @@ type Gender = "m" | "f" | "mf" | null;
 type WordType = "noun" | "verb" | "adjective" | "adverb" | "phrase" | "pronoun" | "preposition" | null;
 interface PendingCard { front: string; back: string; gender: Gender; wordType: WordType }
 
-const FLAG = { fr: "🇫🇷", en: "🇬🇧" } as const;
+const FLAG: Record<string, string> = { fr: "🇫🇷", en: "🇬🇧" };
 
 // ── Flip card confirmation ────────────────────────────────────────────────────
 
@@ -60,21 +61,21 @@ function CardConfirm({
         >
           {/* Front – French */}
           <div
-            style={{ backfaceVisibility: "hidden" }}
-            className="absolute inset-0 flex flex-col items-center justify-center bg-white border border-[var(--color-border)] rounded-3xl px-6"
+            style={{ backfaceVisibility: "hidden", borderRadius: "4px", boxShadow: "0 2px 8px rgba(0,0,0,0.07)" }}
+            className="absolute inset-0 flex flex-col items-center justify-center bg-white border border-[var(--color-border)] px-6"
           >
             <span className="text-xs text-[var(--color-muted)] mb-3">{FLAG.fr} Français</span>
-            <p className="text-2xl font-medium text-center">{card.front}</p>
+            <p className={`text-2xl font-semibold text-center ${caveat.className}`}>{card.front}</p>
             {metaFr && <p className="text-xs text-[var(--color-muted)] mt-2">{metaFr}</p>}
           </div>
 
           {/* Back – English */}
           <div
-            style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-            className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-accent-light)] border border-[var(--color-accent)] rounded-3xl px-6"
+            style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", borderRadius: "4px", boxShadow: "0 2px 8px rgba(0,0,0,0.07)" }}
+            className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-accent-light)] border border-[var(--color-accent)] px-6"
           >
             <span className="text-xs text-[var(--color-accent)] mb-3">{FLAG.en} English</span>
-            <p className="text-2xl font-medium text-center text-[var(--color-accent)]">{card.back}</p>
+            <p className={`text-2xl font-semibold text-center text-[var(--color-accent)] ${caveat.className}`}>{card.back}</p>
             {metaEn && <p className="text-xs text-[var(--color-accent)] opacity-60 mt-2">{metaEn}</p>}
           </div>
         </div>
@@ -90,10 +91,10 @@ function CardConfirm({
         }}
         className="flex gap-3 mt-4"
       >
-        <button onClick={onAdd} className="flex-1 bg-[var(--color-accent)] text-white rounded-2xl py-3.5 font-medium text-sm active:opacity-80">
+        <button onClick={onAdd} className="flex-1 bg-[var(--color-accent)] text-white rounded py-3.5 font-medium text-sm active:opacity-80">
           Add card
         </button>
-        <button onClick={onDismiss} className="flex-1 border border-[var(--color-border)] bg-white rounded-2xl py-3.5 font-medium text-sm text-[var(--color-muted)] active:opacity-80">
+        <button onClick={onDismiss} className="flex-1 border border-[var(--color-border)] bg-white rounded py-3.5 font-medium text-sm text-[var(--color-muted)] active:opacity-80">
           Dismiss
         </button>
       </div>
@@ -105,11 +106,13 @@ function CardConfirm({
 
 export function QuickAdd({ deckCards = [] }: { deckCards?: DeckCard[] }) {
   const [query, setQuery] = useState("");
-  const [inputLang, setInputLang] = useState<"fr" | "en">("fr");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [highlighted, setHighlighted] = useState(0);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<PendingCard | null>(null);
+  const [showBulk, setShowBulk] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkResult, setBulkResult] = useState<{ count?: number; error?: string } | null>(null);
   const [, startTransition] = useTransition();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -135,22 +138,21 @@ export function QuickAdd({ deckCards = [] }: { deckCards?: DeckCard[] }) {
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
+        const lc = value.toLowerCase();
         const deckMatches: Suggestion[] = deckCards
-          .filter((c) => {
-            const field = inputLang === "fr" ? c.front : c.back;
-            return field.toLowerCase().startsWith(value.toLowerCase());
-          })
+          .filter((c) => c.front.toLowerCase().startsWith(lc) || c.back.toLowerCase().startsWith(lc))
           .slice(0, 4)
-          .map((c) => ({ word: inputLang === "fr" ? c.front : c.back, lang: inputLang }));
+          .map((c) => c.front.toLowerCase().startsWith(lc)
+            ? { word: c.front, lang: "fr" as const }
+            : { word: c.back, lang: "en" as const });
 
         setSuggestions(deckMatches);
 
         const res = await fetch(`/api/suggest?q=${encodeURIComponent(value)}`);
         const data = await res.json() as { suggestions: Suggestion[] };
         const deckSet = new Set(deckMatches.map((s) => s.word.toLowerCase()));
-        const primary = data.suggestions.filter((s) => s.lang === inputLang && !deckSet.has(s.word.toLowerCase()));
-        const secondary = data.suggestions.filter((s) => s.lang !== inputLang && !deckSet.has(s.word.toLowerCase()));
-        setSuggestions([...deckMatches, ...primary, ...secondary].slice(0, 10));
+        const apiResults = data.suggestions.filter((s) => !deckSet.has(s.word.toLowerCase()));
+        setSuggestions([...deckMatches, ...apiResults].slice(0, 10));
       } catch {
         // keep deck matches
       } finally {
@@ -165,23 +167,18 @@ export function QuickAdd({ deckCards = [] }: { deckCards?: DeckCard[] }) {
     setLoading(true);
     try {
       const dir = s.lang === "fr" ? "fr|en" : "en|fr";
-      const frenchWord = s.word; // always fetch gender for the French word
-
-      const [translateRes, genderRes] = await Promise.all([
-        fetch(`/api/translate?text=${encodeURIComponent(s.word)}&dir=${dir}`),
-        s.lang === "fr"
-          ? fetch(`/api/gender?word=${encodeURIComponent(frenchWord)}`)
-          : Promise.resolve(null),
-      ]);
-
+      const translateRes = await fetch(`/api/translate?text=${encodeURIComponent(s.word)}&dir=${dir}`);
       const { results } = await translateRes.json() as { results: string[] };
       const translation = results[0] ?? "";
+
       const front = s.lang === "fr" ? s.word : translation;
       const back = s.lang === "fr" ? translation : s.word;
+      const frenchWord = s.lang === "fr" ? s.word : translation;
 
       let gender: Gender = null;
       let wordType: WordType = null;
-      if (genderRes) {
+      if (frenchWord) {
+        const genderRes = await fetch(`/api/gender?word=${encodeURIComponent(frenchWord)}`);
         const gData = await genderRes.json() as { gender: Gender; wordType: WordType };
         gender = gData.gender;
         wordType = gData.wordType;
@@ -214,28 +211,67 @@ export function QuickAdd({ deckCards = [] }: { deckCards?: DeckCard[] }) {
   return (
     <div ref={containerRef} className="relative">
       {/* Input */}
-      <div className="flex items-center border border-[var(--color-border)] rounded-2xl bg-white focus-within:border-[var(--color-accent)]">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 flex items-center border border-[var(--color-border)] rounded-2xl bg-white focus-within:border-[var(--color-accent)]">
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            autoComplete="off"
+            onChange={(e) => handleChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => { if (query.length >= 2) handleChange(query); }}
+            placeholder="Type a word…"
+            className="flex-1 py-3.5 px-5 text-base outline-none bg-transparent"
+          />
+          {loading && <Loader2 size={16} className="mr-4 text-[var(--color-muted)] animate-spin shrink-0" />}
+        </div>
         <button
           type="button"
-          onClick={() => { setInputLang((l) => l === "fr" ? "en" : "fr"); setQuery(""); setSuggestions([]); setPending(null); }}
-          className="pl-4 pr-2 py-3.5 text-base shrink-0 select-none"
-          title="Switch language"
+          onClick={() => { setShowBulk((v) => !v); setBulkResult(null); }}
+          className={`p-3 rounded-2xl border transition-colors ${showBulk ? "border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-light)]" : "border-[var(--color-border)] text-[var(--color-muted)] bg-white"}`}
+          aria-label="Bulk import"
         >
-          {FLAG[inputLang]}
+          <MoreHorizontal size={20} />
         </button>
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          autoComplete="off"
-          onChange={(e) => handleChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => { if (query.length >= 2) handleChange(query); }}
-          placeholder={inputLang === "fr" ? "Type a French word…" : "Type an English word…"}
-          className="flex-1 py-3.5 pr-4 text-base outline-none bg-transparent"
-        />
-        {loading && <Loader2 size={16} className="mr-4 text-[var(--color-muted)] animate-spin shrink-0" />}
       </div>
+
+      {/* Bulk import panel */}
+      {showBulk && (
+        <div className="mt-3 flex flex-col gap-3">
+          <p className="text-xs text-[var(--color-muted)]">
+            Paste multiple lines — one entry per line, French and English separated by a dash, colon, or pipe.
+          </p>
+          <textarea
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+            placeholder={"bonjour - hello\nmerci - thank you"}
+            rows={8}
+            className="w-full border border-[var(--color-border)] rounded-2xl px-5 py-4 text-sm font-mono outline-none focus:border-[var(--color-accent)] bg-white resize-none leading-relaxed"
+          />
+          {bulkResult && (
+            <div className={`px-4 py-3 rounded-xl text-sm font-medium ${bulkResult.error ? "bg-red-50 text-red-700" : "bg-[var(--color-accent-light)] text-[var(--color-accent)]"}`}>
+              {bulkResult.error ?? `${bulkResult.count} card${bulkResult.count === 1 ? "" : "s"} imported`}
+            </div>
+          )}
+          <button
+            type="button"
+            disabled={!bulkText.trim()}
+            onClick={() => {
+              if (!bulkText.trim()) return;
+              setBulkResult(null);
+              startTransition(async () => {
+                const r = await importCards(bulkText);
+                setBulkResult(r);
+                if (r.count && r.count > 0) setBulkText("");
+              });
+            }}
+            className="w-full bg-[var(--color-accent)] text-white rounded-2xl py-4 font-medium disabled:opacity-40"
+          >
+            Import
+          </button>
+        </div>
+      )}
 
       {/* Suggestions */}
       {suggestions.length > 0 && (
@@ -252,9 +288,6 @@ export function QuickAdd({ deckCards = [] }: { deckCards?: DeckCard[] }) {
             >
               <span className="text-base">{FLAG[s.lang]}</span>
               <span>{s.word}</span>
-              {s.lang !== inputLang && (
-                <span className="ml-auto text-xs text-[var(--color-muted)]">other language</span>
-              )}
             </button>
           ))}
         </div>

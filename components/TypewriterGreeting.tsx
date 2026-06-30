@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Dancing_Script } from "next/font/google";
+
+const dancingScript = Dancing_Script({ subsets: ["latin"], weight: "600" });
 
 const PHRASE_1 = "Hi, Ben";
 const PHRASE_2 = "Bonjour Ben";
@@ -40,7 +43,7 @@ export function TypewriterGreeting() {
   }, [text, phase]);
 
   return (
-    <h1 className="text-3xl font-semibold mt-1 flex items-center gap-0.5">
+    <h1 className={`text-4xl mt-1 flex items-center justify-center gap-0.5 ${dancingScript.className}`}>
       {text}
       {phase < 3 && (
         <span

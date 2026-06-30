@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Exercise } from "@/lib/exercises";
+import { caveat } from "@/lib/fonts";
 
 export function TranslationExercise({
   exercise,
@@ -23,9 +24,9 @@ export function TranslationExercise({
 
   return (
     <div className="flex-1 flex flex-col gap-5">
-      <div className="bg-white border border-[var(--color-border)] rounded-3xl p-8 text-center">
+      <div className="bg-white shadow-[2px_3px_0px_rgba(0,0,0,0.12)] p-8 text-center">
         <p className="text-xs text-[var(--color-muted)] uppercase tracking-widest mb-3">{label}</p>
-        <p className="text-2xl font-medium">{exercise.prompt}</p>
+        <p className={`text-2xl font-semibold ${caveat.className}`}>{exercise.prompt}</p>
       </div>
 
       {!answered ? (

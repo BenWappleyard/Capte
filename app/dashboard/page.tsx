@@ -8,13 +8,12 @@ async function getStats() {
   const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const [totalCards, reviews, schedules] = await Promise.all([
+  const [totalCards, reviews] = await Promise.all([
     prisma.card.count(),
     prisma.review.findMany({
       where: { reviewedAt: { gte: thirtyDaysAgo } },
       orderBy: { reviewedAt: "asc" },
     }),
-    prisma.cardSchedule.findMany(),
   ]);
 
   const ratingCounts = reviews.reduce(
@@ -37,14 +36,7 @@ async function getStats() {
     retention: d.count > 0 ? Math.round((d.retention / d.count) * 100) : 0,
   }));
 
-  const due7 = schedules.filter((s) => {
-    const d = new Date(s.nextReview);
-    const in7 = new Date(now);
-    in7.setDate(in7.getDate() + 7);
-    return d <= in7;
-  }).length;
-
-  return { totalCards, totalReviews: reviews.length, retention, dailyData, due7 };
+  return { totalCards, totalReviews: reviews.length, retention, dailyData };
 }
 
 export default async function DashboardPage() {

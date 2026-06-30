@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Exercise } from "@/lib/exercises";
+import { caveat } from "@/lib/fonts";
 
 export function FillInTheBlank({
   exercise,
@@ -25,11 +26,11 @@ export function FillInTheBlank({
 
   return (
     <div className="flex-1 flex flex-col gap-5">
-      <div className="bg-white border border-[var(--color-border)] rounded-3xl p-8 text-center">
+      <div className="bg-white shadow-[2px_3px_0px_rgba(0,0,0,0.12)] p-8 text-center">
         <p className="text-xs text-[var(--color-muted)] uppercase tracking-widest mb-3">
           Fill in the blank
         </p>
-        <p className="text-xl font-medium leading-relaxed">{exercise.prompt}</p>
+        <p className={`text-xl font-semibold leading-relaxed ${caveat.className}`}>{exercise.prompt}</p>
         {exercise.hints && (
           <p className="text-sm text-[var(--color-muted)] mt-3">({exercise.hints})</p>
         )}

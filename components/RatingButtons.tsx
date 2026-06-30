@@ -3,10 +3,9 @@
 import type { Rating } from "@/lib/srs";
 
 const ratings: { label: string; value: Rating; color: string }[] = [
-  { label: "Again", value: 1, color: "var(--color-again)" },
-  { label: "Hard", value: 2, color: "var(--color-hard)" },
-  { label: "Good", value: 3, color: "var(--color-good)" },
-  { label: "Easy", value: 4, color: "var(--color-easy)" },
+  { label: "I don't know", value: 1, color: "var(--color-again)" },
+  { label: "I hesitated", value: 2, color: "var(--color-hard)" },
+  { label: "I know it", value: 4, color: "var(--color-good)" },
 ];
 
 export function RatingButtons({
@@ -17,7 +16,7 @@ export function RatingButtons({
   disabled?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-3 gap-2">
       {ratings.map(({ label, value, color }) => (
         <button
           key={value}
